@@ -1,0 +1,294 @@
+﻿@model List<MongoDbGunduz.Dtos.OrderDtos.ResultOrderWithCustomerAndProductDto>
+@{
+    ViewData["Title"] = "OrderList";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .page-btn {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-added {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+            .btn-added img {
+                margin-right: 5px;
+            }
+
+        .btn-download {
+            background-color: #28a745;
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+
+            .btn-download img {
+                margin-right: 5px;
+            }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .table th,
+            .table td {
+                padding: 10px;
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .table thead {
+                background-color: #007bff;
+                color: #fff;
+            }
+
+            .table tbody tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            .table a {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+                .table a:hover {
+                    color: #0056b3;
+                }
+
+        .img-thumbnail {
+            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .actions img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .actions a {
+            margin: 0 5px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+            .pagination button {
+                margin: 0 5px;
+                padding: 10px 15px;
+                border: none;
+                background-color: #007bff;
+                color: #fff;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+                .pagination button:disabled {
+                    background-color: #cccccc;
+                }
+
+                .pagination button.active {
+                    background-color: #0056b3;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Order List</h4>
+                <h6>Manage your orders</h6>
+            </div>
+            <div class="page-btn">
+                <a href="/Order/CreateOrder/" class="btn btn-added">
+                    <img src="@Url.Content("~/inventory/assets/img/icons/plus.svg")" alt="Add" class="me-1">Add New Order
+                </a>
+            </div>
+        </div>
+
+        <!-- Butonlar için yeni eklenen kod -->
+        <div class="download-buttons">
+            <a href="#" id="download-pdf" class="btn-download">
+                <img src="@Url.Content("~/inventory/assets/img/icons/pdf.svg")" alt="PDF">Download PDF
+            </a>
+            <a href="#" id="download-excel" class="btn-download">
+                <img src="@Url.Content("~/inventory/assets/img/icons/excel.svg")" alt="Excel">Download Excel
+            </a>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Order Date</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Product Quantity</th>
+                    <th>Delete</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody id="orderList">
+                @foreach (var item in Model.Select((value, index) => new { value, index }))
+                {
+                    <tr>
+                        <td>@(item.index + 1)</td>
+                        <td>@item.value.OrderDate</td>
+                        <td>@(item.value.Customer != null ? item.value.Customer.CustomerFullName : "")</td>
+                        <td>@(item.value.Product != null ? item.value.Product.Name : "")</td>
+                        <td>@item.value.OrderProductStock</td>
+                        <td><a href="/Order/RemoveOrder/@item.value.OrderId" class="btn btn-danger">Delete</a></td>
+                        <td><a href="/Order/UpdateOrder/@item.value.OrderId" class="btn btn-info">Update</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- JavaScript kodları -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const itemsPerPage = 5;
+            const orderList = document.getElementById('orderList');
+            const pagination = document.getElementById('pagination');
+            const items = orderList.getElementsByTagName('tr');
+            const pageCount = Math.ceil(items.length / itemsPerPage);
+            let currentPage = 1;
+
+            function showPage(page) {
+                for (let i = 0; i < items.length; i++) {
+                    items[i].style.display = 'none';
+                }
+
+                const start = (page - 1) * itemsPerPage;
+                const end = page * itemsPerPage;
+
+                for (let i = start; i < end && i < items.length; i++) {
+                    items[i].style.display = '';
+                }
+
+                updatePagination();
+            }
+
+            function updatePagination() {
+                pagination.innerHTML = '';
+
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.disabled = currentPage === 1;
+                prevButton.addEventListener('click', function () {
+                    currentPage--;
+                    showPage(currentPage);
+                });
+                pagination.appendChild(prevButton);
+
+                for (let i = 1; i <= pageCount; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    if (i === currentPage) {
+                        pageButton.classList.add('active');
+                    }
+                    pageButton.addEventListener('click', function () {
+                        currentPage = i;
+                        showPage(currentPage);
+                    });
+                    pagination.appendChild(pageButton);
+                }
+
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.disabled = currentPage === pageCount;
+                nextButton.addEventListener('click', function () {
+                    currentPage++;
+                    showPage(currentPage);
+                });
+                pagination.appendChild(nextButton);
+            }
+
+            showPage(currentPage);
+
+            // PDF ve Excel indirme işlevleri
+            document.getElementById('download-pdf').addEventListener('click', function (e) {
+                e.preventDefault();
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.autoTable({
+                    html: '.table',
+                    theme: 'striped',
+                    headStyles: { fillColor: [0, 123, 255] },
+                    startY: 20,
+                });
+
+                doc.save('order-list.pdf');
+            });
+
+            document.getElementById('download-excel').addEventListener('click', function (e) {
+                e.preventDefault();
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.table_to_sheet(document.querySelector('.table'));
+
+                XLSX.utils.book_append_sheet(wb, ws, 'Order List');
+                XLSX.writeFile(wb, 'order-list.xlsx');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+﻿@model List<MongoDbGunduz.Dtos.ProductDtos.ResultProductWithCategoryDto>
+
+@{
+    ViewData["Title"] = "ProductList";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .page-btn {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-added {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+            .btn-added img {
+                margin-right: 5px;
+            }
+
+        .btn-download {
+            background-color: #28a745;
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+
+            .btn-download img {
+                margin-right: 5px;
+            }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .table-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-set {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-path, .search-input {
+            margin-right: 10px;
+        }
+
+        .btn-filter, .btn-searchset {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+            .btn-filter img, .btn-searchset img {
+                width: 20px;
+                height: 20px;
+            }
+
+        .wordset ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        .wordset li {
+            margin-left: 10px;
+        }
+
+        .wordset img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .table th,
+            .table td {
+                padding: 10px;
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .table thead {
+                background-color: #007bff;
+                color: #fff;
+            }
+
+            .table tbody tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+        .img-thumbnail {
+            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .actions img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .actions a {
+            margin: 0 5px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+            .actions a:hover {
+                color: #0056b3;
+            }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+            .pagination-btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Product List</h4>
+                <h6>Manage your products</h6>
+            </div>
+            <div class="page-btn">
+                <a href="/Product/CreateProduct/" class="btn btn-added">
+                    <img src="~/inventory/assets/img/icons/plus.svg" alt="Add" class="me-1">Add New Product
+                </a>
+            </div>
+        </div>
+
+        <!-- Buttons for downloading -->
+        <div class="card-body">
+            <div class="table-top">
+                <div class="search-set">
+                    <!-- Search and filter areas can be added here -->
+                </div>
+                <div class="table-top-right">
+                    <a href="#" id="download-pdf" class="btn-download">
+                        <img src="~/inventory/assets/img/icons/pdf.svg" alt="PDF">Download PDF
+                    </a>
+                    <a href="#" id="download-excel" class="btn-download">
+                        <img src="~/inventory/assets/img/icons/excel.svg" alt="Excel">Download Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Name</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productList">
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>@product.ProductId</td>
+                                <td>@product.Name</td>
+                                <td>@product.Stock</td>
+                                <td>@product.Price.ToString("C")</td>
+                                <td>@product.Category?.CategoryName</td>
+                                <td>
+                                    <img src="@product.ImageUrl" alt="Product Image" class="img-thumbnail">
+                                </td>
+                                <td class="actions">
+                                    <a href="product-details.html">
+                                        <img src="~/inventory/assets/img/icons/eye.svg" alt="View">
+                                    </a>
+                                    <a href="/Product/UpdateProduct/@product.ProductId">
+                                        <img src="~/inventory/assets/img/icons/edit.svg" alt="Edit">
+                                    </a>
+                                    <a href="/Product/DeleteProduct/@product.ProductId">
+                                        <img src="~/inventory/assets/img/icons/delete.svg" alt="Delete">
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                <button id="prev-page" class="pagination-btn">Previous</button>
+                <span id="page-info"></span>
+                <button id="next-page" class="pagination-btn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
+    <!-- JavaScript for pagination and download -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rowsPerPage = 4;
+            const productList = document.getElementById('productList');
+            const rows = Array.from(productList.getElementsByTagName('tr'));
+            const totalRows = rows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            let currentPage = 1;
+
+            function displayPage(page) {
+                rows.forEach((row, index) => {
+                    row.style.display = (index >= (page - 1) * rowsPerPage && index < page * rowsPerPage) ? '' : 'none';
+                });
+
+                document.getElementById('page-info').textContent = `Page ${page} of ${totalPages}`;
+
+                document.getElementById('prev-page').disabled = page === 1;
+                document.getElementById('next-page').disabled = page === totalPages;
+            }
+
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayPage(currentPage);
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayPage(currentPage);
+                }
+            });
+
+            // Initial display
+            displayPage(currentPage);
+
+            // Download PDF
+            document.getElementById('download-pdf').addEventListener('click', function (e) {
+                e.preventDefault();
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.autoTable({
+                    html: '.table',
+                    theme: 'striped',
+                    headStyles: { fillColor: [0, 123, 255] },
+                    startY: 20,
+                });
+
+                doc.save('product-list.pdf');
+            });
+
+            // Download Excel
+            document.getElementById('download-excel').addEventListener('click', function (e) {
+                e.preventDefault();
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.table_to_sheet(document.querySelector('.table'));
+
+                XLSX.utils.book_append_sheet(wb, ws, 'Product List');
+                XLSX.writeFile(wb, 'product-list.xlsx');
+            });
+        });
+    </script>
+</body>
+</html>

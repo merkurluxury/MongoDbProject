@@ -1,0 +1,58 @@
+﻿@model MongoDbGunduz.Dtos.OrderDtos.GetByIdOrderDto
+
+@{
+    ViewData["Title"] = "CreateOrder";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col">
+        <div class="card shadow">
+            <div class="card-header border-0">
+                <h3 class="mb-0">Sipariş Oluştur</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="container">
+                        @if (ViewBag.ErrorMessage != null)
+                        {
+                            <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+                        }
+
+                        <div class="form-group">
+                            <label for="OrderDate">Sipariş Tarihi</label>
+                            <input type="date" asp-for="OrderDate" class="form-control" id="OrderDate" />
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="CustomerId">Müşteri</label>
+                            @Html.DropDownListFor(x => x.CustomerId, (List<SelectListItem>)ViewBag.CustomerList, "Müşteri Seçiniz", new { @class = "form-control", id = "CustomerId" })
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="ProductId">Ürün</label>
+                            @Html.DropDownListFor(x => x.ProductId, (List<SelectListItem>)ViewBag.ProductList, "Ürün Seçiniz", new { @class = "form-control", id = "ProductId" })
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="Status">Durum</label>
+                            <select asp-for="Status" class="form-control" id="Status">
+                                <option value="true">Aktif</option>
+                                <option value="false">Pasif</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="OrderProductStock">Adet</label>
+                            <input type="number" asp-for="OrderProductStock" class="form-control" id="OrderProductStock" />
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">Siparişi Oluştur</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

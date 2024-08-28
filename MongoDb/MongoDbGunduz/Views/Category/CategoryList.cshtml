@@ -1,0 +1,60 @@
+﻿@model List<MongoDbGunduz.Dtos.CategoryDtos.ResultCategoryDto>
+
+@{
+    ViewData["Title"] = "CategoryList";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h4>Product Category List</h4>
+            <h6>View/Search Product Categories</h6>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/Category/CreateCategory/" class="btn btn-info">
+                <img src="~/inventory/assets/img/icons/plus.svg" class="me-1" alt="New Category">Add New Category
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kategori Id</th>
+                            <th>Kategori Adı</th>
+                            <th>Sil</th>
+                            <th>Güncelle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.CategoryId</td>
+                                <td>@item.CategoryName</td>
+                                <td>
+                                    <a href="/Category/DeleteCategory/@item.CategoryId" class="btn btn-danger btn-sm">
+                                        <img src="~/inventory/assets/img/icons/delete.svg" alt="Sil">
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="/Category/UpdateCategory/@item.CategoryId" class="btn btn-success btn-sm">
+                                        <img src="~/inventory/assets/img/icons/edit.svg" alt="Güncelle">
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
